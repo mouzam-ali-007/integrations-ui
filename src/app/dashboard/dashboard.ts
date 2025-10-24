@@ -8,9 +8,5 @@ import { Component } from '@angular/core';
   standalone: true, 
 })
 export class Dashboard {
-  isConnected = false;
-
-  connectToGithub() {
-    this.isConnected = !this.isConnected;
-  }
+ 
 }
