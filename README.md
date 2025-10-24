@@ -44,16 +44,17 @@ To execute unit tests with the [Karma](https://karma-runner.github.io) test runn
 ng test
 ```
 
-## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
 
-```bash
-ng e2e
-```
+We want to connect to GitHub via API using OAuth (2) authentication.
+a. Documentation: https://docs.github.com/en/rest?apiVersion=2022-11-28.
+b. When the Connect button is clicked, we will redirect the user to GitHub for
+Authentication using OAuth (2)
+c. After the successful integration, we display the success status.
+d. We will store the authentication details in a MongoDB DB integrations and
+collection: github-integration
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+e. When we refresh the page, if we have already connected the page should
+have the green checkmark and it should display the date when the
+integration was connected.
+f. • Store the information of the user who authenticated.

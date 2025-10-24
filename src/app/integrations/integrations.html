@@ -1,0 +1,24 @@
+<div class="dashboard-container">
+    <header class="header">
+        <h1>GitHub Integration</h1>
+        <p>Connect your GitHub account to access repositories and insights.</p>
+    </header>
+
+    <div class="card">
+        <div class="github-logo">
+            <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" />
+        </div>
+
+        <h2>{{ isConnected ? 'Connected to GitHub' : 'Not Connected' }}</h2>
+        <p *ngIf="!isConnected">Click below to connect your GitHub account.</p>
+        <p *ngIf="isConnected">You are successfully connected to GitHub 🎉</p>
+
+        <button class="connect-btn" [class.connected]="isConnected" (click)="connectToGithub()">
+            {{ isConnected ? 'Disconnect' : 'Connect to GitHub' }}
+        </button>
+    </div>
+
+    <footer class="footer">
+        <p>© 2025 Dashboard Integration</p>
+    </footer>
+</div>

@@ -1,3 +1,11 @@
 import { Routes } from '@angular/router';
+import { Integrations } from './integrations/integrations';
 
-export const routes: Routes = [];
+/* 
+    Routing
+*/
+export const routes: Routes = [
+  { path: '', redirectTo: 'integration', pathMatch: 'full' },
+  { path: 'integration', component: Integrations },
+];
+
