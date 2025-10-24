@@ -1,24 +1,122 @@
-<div class="dashboard-container">
-    <header class="header">
-        <h1>GitHub Integration</h1>
-        <p>Connect your GitHub account to access repositories and insights.</p>
-    </header>
-
-    <div class="card">
-        <div class="github-logo">
-            <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" alt="GitHub" />
+<div class="landing-container">
+    <!-- Hero Section -->
+    <mat-toolbar class="hero-toolbar" color="primary">
+        <div class="hero-content">
+            <div class="hero-text">
+                <h1 class="hero-title">
+                    <mat-icon class="hero-icon">code</mat-icon>
+                    GitHub Integration Dashboard
+                </h1>
+                <p class="hero-subtitle">
+                    Connect, explore, and manage your GitHub data with a powerful, responsive interface
+                </p>
+            </div>
+            <div class="hero-actions">
+                <button mat-raised-button color="accent" class="cta-button" (click)="navigateToGitHubIntegration()">
+                    <mat-icon>launch</mat-icon>
+                    Get Started
+                </button>
+            </div>
         </div>
+    </mat-toolbar>
 
-        <h2>{{ isConnected ? 'Connected to GitHub' : 'Not Connected' }}</h2>
-        <p *ngIf="!isConnected">Click below to connect your GitHub account.</p>
-        <p *ngIf="isConnected">You are successfully connected to GitHub 🎉</p>
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="section-header">
+                <h2>Powerful Features</h2>
+                <p>Everything you need to manage your GitHub data effectively</p>
+            </div>
 
-        <button class="connect-btn" [class.connected]="isConnected" (click)="connectToGithub()">
-            {{ isConnected ? 'Disconnect' : 'Connect to GitHub' }}
-        </button>
+            <div class="features-grid">
+                <mat-card class="feature-card" *ngFor="let feature of features">
+                    <mat-card-header>
+                        <mat-icon mat-card-avatar class="feature-icon">{{ feature.icon }}</mat-icon>
+                        <mat-card-title>{{ feature.title }}</mat-card-title>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <p>{{ feature.description }}</p>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </section>
+
+        <mat-divider></mat-divider>
+
+        <!-- Data Collections Section -->
+        <section class="collections-section">
+            <div class="section-header">
+                <h2>Supported GitHub Collections</h2>
+                <p>Access and analyze all your GitHub data in one place</p>
+            </div>
+
+            <div class="collections-container">
+                <mat-chip-set class="collections-chips">
+                    <mat-chip *ngFor="let collection of supportedCollections" class="collection-chip">
+                        <mat-icon matChipAvatar>storage</mat-icon>
+                        {{ collection }}
+                    </mat-chip>
+                </mat-chip-set>
+            </div>
+        </section>
+
+        <mat-divider></mat-divider>
+
+        <!-- Getting Started Section -->
+        <section class="getting-started-section">
+            <mat-card class="getting-started-card">
+                <mat-card-header>
+                    <mat-icon mat-card-avatar class="github-icon">code</mat-icon>
+                    <mat-card-title>Ready to Get Started?</mat-card-title>
+                    <mat-card-subtitle>Connect your GitHub account and start exploring your data</mat-card-subtitle>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="steps-container">
+                        <div class="step">
+                            <mat-icon class="step-icon">security</mat-icon>
+                            <div class="step-content">
+                                <h4>1. Secure Authentication</h4>
+                                <p>Connect using OAuth2 for secure access</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <mat-icon class="step-icon">explore</mat-icon>
+                            <div class="step-content">
+                                <h4>2. Explore Your Data</h4>
+                                <p>Browse repositories, issues, and more</p>
+                            </div>
+                        </div>
+                        <div class="step">
+                            <mat-icon class="step-icon">analytics</mat-icon>
+                            <div class="step-content">
+                                <h4>3. Analyze & Manage</h4>
+                                <p>Use advanced filtering and search tools</p>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+                <mat-card-actions align="end">
+                    <button mat-raised-button color="primary" class="start-button"
+                        (click)="navigateToGitHubIntegration()">
+                        <mat-icon>rocket_launch</mat-icon>
+                        Start GitHub Integration
+                    </button>
+                </mat-card-actions>
+            </mat-card>
+        </section>
     </div>
 
+    <!-- Footer -->
     <footer class="footer">
-        <p>© 2025 Dashboard Integration</p>
+        <div class="footer-content">
+            <div class="footer-info">
+                <mat-icon class="footer-icon">dashboard</mat-icon>
+                <span>Industrial Park Dashboard</span>
+            </div>
+            <div class="footer-links">
+                <span class="footer-text">© 2025 GitHub Integration Module</span>
+            </div>
+        </div>
     </footer>
 </div>

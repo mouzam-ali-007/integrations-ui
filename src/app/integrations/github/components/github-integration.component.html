@@ -1,0 +1,201 @@
+<div class="github-integration-wrapper" [class.mobile]="isMobile" [class.tablet]="isTablet" [class.desktop]="isDesktop"
+    (window:resize)="onWindowResize()">
+
+    <!-- Modern Header -->
+    <mat-toolbar color="primary" class="app-header">
+        <mat-toolbar-row>
+            <div class="header-content">
+                <div class="logo-section">
+                    <mat-icon class="logo-icon">integration_instructions</mat-icon>
+                    <span class="app-title">GitHub Integration Dashboard</span>
+                </div>
+                <span class="spacer"></span>
+                <div class="header-actions" *ngIf="state.isConnected && state.userInfo">
+                    <button mat-icon-button [matMenuTriggerFor]="userMenu" class="user-menu-button">
+                        <img [src]="state.userInfo.avatarUrl" [alt]="state.userInfo.username" class="header-avatar">
+                    </button>
+                    <mat-menu #userMenu="matMenu">
+                        <div class="user-menu-header">
+                            <img [src]="state.userInfo.avatarUrl" [alt]="state.userInfo.username" class="menu-avatar">
+                            <div class="menu-user-info">
+                                <strong>{{ state.userInfo.displayName || state.userInfo.username }}</strong>
+                                <span class="menu-username">@{{ state.userInfo.username }}</span>
+                            </div>
+                        </div>
+                        <mat-divider></mat-divider>
+                        <button mat-menu-item (click)="resyncIntegration()">
+                            <mat-icon>refresh</mat-icon>
+                            <span>Re-sync Integration</span>
+                        </button>
+                        <button mat-menu-item (click)="removeIntegration()">
+                            <mat-icon>logout</mat-icon>
+                            <span>Disconnect</span>
+                        </button>
+                    </mat-menu>
+                </div>
+            </div>
+        </mat-toolbar-row>
+    </mat-toolbar>
+
+    <!-- Main Content Area -->
+    <div class="main-content-area">
+        <div class="content-container">
+
+            <!-- Welcome Section (Not Connected) -->
+            <div class="welcome-section" *ngIf="!state.isConnected">
+                <mat-card class="welcome-card">
+                    <mat-card-content>
+                        <div class="welcome-content">
+                            <div class="welcome-icon-container">
+                                <mat-icon class="welcome-icon">code</mat-icon>
+                            </div>
+                            <h1 class="welcome-title">Welcome to GitHub Integration</h1>
+                            <p class="welcome-subtitle">Connect your GitHub account to access repositories, issues, pull
+                                requests, and more</p>
+
+                            <div class="features-preview">
+                                <div class="feature-item">
+                                    <mat-icon>security</mat-icon>
+                                    <span>Secure OAuth2</span>
+                                </div>
+                                <div class="feature-item">
+                                    <mat-icon>storage</mat-icon>
+                                    <span>Full Data Access</span>
+                                </div>
+                                <div class="feature-item">
+                                    <mat-icon>search</mat-icon>
+                                    <span>Advanced Search</span>
+                                </div>
+                            </div>
+
+                            <button mat-raised-button color="primary" (click)="connectToGitHub()"
+                                [disabled]="state.isLoading" class="connect-button-large">
+                                <mat-icon *ngIf="!state.isLoading">link</mat-icon>
+                                <mat-spinner *ngIf="state.isLoading" diameter="20"></mat-spinner>
+                                {{ state.isLoading ? 'Connecting...' : 'Connect to GitHub' }}
+                            </button>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+            <!-- Connected Dashboard Section -->
+            <div class="dashboard-section" *ngIf="state.isConnected && state.userInfo">
+
+                <!-- Data Explorer Section -->
+                <mat-card class="data-explorer-card">
+                    <mat-card-header>
+                        <mat-card-title>
+                            <mat-icon>explore</mat-icon>
+                            GitHub Data Explorer
+                        </mat-card-title>
+                        <mat-card-subtitle>Browse and analyze your GitHub data</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+
+                        <!-- Controls Container for Responsive Layout -->
+                        <div class="controls-container" [class.mobile-layout]="isMobile">
+                            <!-- Entity Selection -->
+                            <mat-form-field class="entity-selector" [class.full-width]="isMobile">
+                                <mat-label>Select Data Type</mat-label>
+                                <mat-select [value]="state.selectedEntity"
+                                    (selectionChange)="onEntitySelectionChange($event.value)"
+                                    [disabled]="!state.isConnected || state.isLoading"
+                                    aria-label="Select GitHub data type to view">
+                                    <mat-option *ngFor="let entity of availableEntities" [value]="entity.type">
+                                        {{ entity.displayName }}
+                                    </mat-option>
+                                </mat-select>
+                            </mat-form-field>
+
+                            <!-- Global Search -->
+                            <mat-form-field class="search-field" [class.full-width]="isMobile">
+                                <mat-label>Search</mat-label>
+                                <input matInput [placeholder]="isMobile ? 'Search...' : 'Search across all columns...'"
+                                    [formControl]="globalSearchControl"
+                                    [disabled]="!state.isConnected || state.isLoading"
+                                    aria-label="Search across all data columns">
+                                <mat-icon matSuffix aria-hidden="true">search</mat-icon>
+                                <button matSuffix mat-icon-button *ngIf="globalSearchControl.value"
+                                    (click)="clearGlobalSearch()" type="button" aria-label="Clear search">
+                                    <mat-icon aria-hidden="true">clear</mat-icon>
+                                </button>
+                            </mat-form-field>
+                        </div>
+
+                        <!-- Loading States -->
+                        <!-- Schema Loading -->
+                        <div class="loading-container" *ngIf="state.isLoading && state.loadingOperation === 'schema'"
+                            role="status" aria-live="polite">
+                            <mat-spinner diameter="40" aria-label="Loading data structure"></mat-spinner>
+                            <p>Loading data structure for {{ state.selectedEntity | titlecase }}...</p>
+                        </div>
+
+                        <!-- Data Loading with Skeleton -->
+                        <div class="loading-container" *ngIf="state.isLoading && state.loadingOperation === 'data'"
+                            role="status" aria-live="polite">
+                            <div class="skeleton-grid" aria-label="Loading data, please wait" role="img">
+                                <div class="skeleton-header" aria-hidden="true">
+                                    <div class="skeleton-cell" *ngFor="let i of [1,2,3,4,5]; trackBy: trackByIndex">
+                                    </div>
+                                </div>
+                                <div class="skeleton-row" *ngFor="let i of [1,2,3,4,5,6,7,8]; trackBy: trackByIndex"
+                                    aria-hidden="true">
+                                    <div class="skeleton-cell" *ngFor="let j of [1,2,3,4,5]; trackBy: trackByIndex">
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="loading-text">Loading {{ state.selectedEntity | titlecase }} data...</p>
+                        </div>
+
+                        <!-- General Loading -->
+                        <div class="loading-container" *ngIf="state.isLoading && !state.loadingOperation" role="status"
+                            aria-live="polite">
+                            <mat-spinner diameter="40" aria-label="Loading"></mat-spinner>
+                            <p>Loading {{ state.selectedEntity | titlecase }}...</p>
+                        </div>
+
+                        <!-- AG Grid Data Table -->
+                        <div class="grid-container" [class.mobile-grid]="isMobile" [class.tablet-grid]="isTablet"
+                            *ngIf="!state.isLoading && state.selectedEntity && state.gridColumns.length > 0"
+                            role="region" aria-label="GitHub data table">
+                            <ag-grid-angular class="ag-theme-material" [gridOptions]="gridOptions"
+                                [columnDefs]="state.gridColumns"
+                                [style.height]="isMobile ? '400px' : (isTablet ? '500px' : '600px')"
+                                style="width: 100%;"
+                                [attr.aria-label]="'Data table showing ' + (state.selectedEntity | titlecase)">
+                            </ag-grid-angular>
+                        </div>
+
+                        <!-- No Data Message -->
+                        <div class="no-data-message"
+                            *ngIf="!state.isLoading && state.selectedEntity && state.gridColumns.length === 0"
+                            role="status" aria-live="polite">
+                            <mat-icon aria-hidden="true">inbox</mat-icon>
+                            <p>No {{ state.selectedEntity | titlecase }} found</p>
+                        </div>
+
+                    </mat-card-content>
+                </mat-card>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modern Footer -->
+    <footer class="app-footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <mat-icon class="footer-icon">dashboard</mat-icon>
+                <span class="footer-text">GitHub Integration Dashboard</span>
+            </div>
+            <div class="footer-center">
+                <span class="footer-version">v1.0.0</span>
+            </div>
+            <div class="footer-right">
+                <span class="footer-copyright">© 2025 All rights reserved</span>
+            </div>
+        </div>
+    </footer>
+
+</div>

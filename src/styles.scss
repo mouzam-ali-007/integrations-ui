@@ -1,1 +1,26 @@
 /* You can add global styles to this file, and also import other style files */
+
+/* Angular Material Theme */
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
+
+/* AG Grid Themes */
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-material.css';
+
+/* Global AG Grid Customizations */
+.ag-theme-material {
+    --ag-header-height: 48px;
+    --ag-row-height: 40px;
+    --ag-border-color: #e0e0e0;
+    --ag-header-background-color: #fafafa;
+    --ag-odd-row-background-color: #f9f9f9;
+    --ag-font-family: 'Roboto', sans-serif;
+}
+
+/* Responsive AG Grid */
+@media (max-width: 768px) {
+    .ag-theme-material {
+        --ag-header-height: 40px;
+        --ag-row-height: 36px;
+    }
+}
