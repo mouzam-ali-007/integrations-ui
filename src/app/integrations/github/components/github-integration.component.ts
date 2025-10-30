@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil, debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
@@ -98,6 +99,7 @@ export class GitHubIntegrationComponent implements OnInit, OnDestroy {
 
   // Responsive grid configuration
   responsiveGridOptions: any = {};
+  access_token =false;
 
   // AG Grid configuration
   gridOptions = {
@@ -118,6 +120,8 @@ export class GitHubIntegrationComponent implements OnInit, OnDestroy {
     enableFilter: true,
     suppressMenuHide: true,
     suppressRowClickSelection: true,
+
+  
 
     // Column configuration
     defaultColDef: {
@@ -141,8 +145,11 @@ export class GitHubIntegrationComponent implements OnInit, OnDestroy {
     private stateService: GitHubStateService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private breakpointObserver: BreakpointObserver
+    private breakpointObserver: BreakpointObserver,
+    private route: ActivatedRoute,
+ private router: Router
   ) { }
+
 
   ngOnInit(): void {
     this.initializeComponent();
@@ -150,13 +157,78 @@ export class GitHubIntegrationComponent implements OnInit, OnDestroy {
     this.setupGlobalSearch();
     this.setupResponsiveDesign();
     this.checkForOAuth2Callback();
+
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get('code');
+  
+    if (code) {
+       this.getQueryParamsCode(code);
+    }
+  
   }
+
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
+
+  getQueryParamsCode (code :any) : void {
+    console.log("code", code)
+
+     
+
+     if (code) {
+      const token = localStorage.getItem('access_token');
+
+        if(!token){
+      this.authService.getAccessToken(code).subscribe({
+        next: (res:any) => {
+          console.log('Access Token Response:', res);
+          localStorage.setItem('access_token', res.access_token);
+          this.access_token = true;
+          this.authService.saveUser(res.access_token).subscribe({
+            next: (user:any) => {
+              console.log(user)
+            }
+          })
+        },
+        error: (err:any) => {
+          console.error('Error fetching access token:', err);
+          this.access_token = false;
+        }
+      });
+    }else {
+      this.access_token = true;
+    }
+    }
+  }
+
+  viewCollection(): void {
+    this.router.navigate(['/dashboard']);
+  }
+
+ 
+
+  removeAccessToken() : void {
+
+  
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        localStorage.removeItem('access_token'); 
+
+        this.authService.removeUser().subscribe({
+          next: (response:any) => {
+            console.log("DELETED")
+          }
+        })
+      }
+   
+      // remove from api 
+}
+
+  //removeAccessToken
   /**
    * Handle window resize events for responsive grid adjustments
    */
@@ -212,28 +284,29 @@ export class GitHubIntegrationComponent implements OnInit, OnDestroy {
       });
   }
 
-  connectToGitHub(): void {
-    this.state.isLoading = true;
-    this.state.loadingOperation = 'connect';
 
-    this.authService.initiateOAuth2Flow()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (result) => {
-          this.state.isLoading = false;
-          this.state.loadingOperation = undefined;
-          this.showSuccessNotification('GitHub authentication initiated successfully', 'Authentication started');
-          // OAuth2 flow initiated successfully
-          // The actual connection will be handled by the callback
-        },
-        error: (error) => {
-          this.state.isLoading = false;
-          this.state.loadingOperation = undefined;
-          console.error('OAuth2 flow initiation failed:', error);
-          this.showErrorNotification('Failed to initiate GitHub authentication. Please try again.', 'Authentication failed');
-        }
-      });
+
+  async connectToGitHub(): Promise<any> {
+    this.state.isLoading = true;
+  this.state.loadingOperation = 'connect';
+
+try {
+  console.log("initiateOAuth2Flow")
+  const response = await  this.authService.initiateOAuth2Flow();
+  // get code from query parameter 
+
+  if (response) {
+  // await this.getQueryParamsCode();
   }
+  
+  this.showSuccessNotification('GitHub authentication initiated successfully', 'Authentication started');
+} catch (error) {
+  this.state.isLoading = false;
+  this.state.loadingOperation = undefined;
+  console.error('OAuth2 flow initiation failed:', error);
+  this.showErrorNotification('Failed to initiate GitHub authentication. Please try again.', 'Authentication failed');
+}
+  }  
 
   removeIntegration(): void {
     const dialogData: ConfirmationDialogData = {

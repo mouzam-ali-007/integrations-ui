@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse,HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError, timer } from 'rxjs';
 import { catchError, tap, map, switchMap, takeUntil, filter } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
 
 import { GitHubConnectionState, GitHubUserInfo } from '../models/github-interfaces';
 import { GitHubStateService } from './github-state.service';
@@ -10,7 +11,7 @@ import { GitHubStateService } from './github-state.service';
     providedIn: 'root'
 })
 export class GitHubAuthService {
-    private readonly API_BASE_URL = '/api/github'; // This will be configured based on backend
+    private readonly API_BASE_URL = 'http://localhost:8080'; // This will be configured based on backend
     private readonly TOKEN_REFRESH_INTERVAL = 15 * 60 * 1000; // 15 minutes
     private readonly TOKEN_EXPIRY_BUFFER = 5 * 60 * 1000; // 5 minutes buffer before expiry
 
@@ -26,7 +27,8 @@ export class GitHubAuthService {
 
     constructor(
         private http: HttpClient,
-        private stateService: GitHubStateService
+        private stateService: GitHubStateService,
+        private route: ActivatedRoute,
     ) {
         this.initializeAuthState();
         this.setupTokenRefreshTimer();
@@ -67,28 +69,89 @@ export class GitHubAuthService {
         return this.authenticationState$.value.userInfo;
     }
 
+    
     /**
      * Initiate OAuth2 flow with GitHub
      */
-    initiateOAuth2Flow(): Observable<any> {
+    initiateOAuth2Flow(): any {
         this.setLoadingState(true);
 
-        return this.http.post(`${this.API_BASE_URL}/auth/initiate`, {})
-            .pipe(
-                tap((response: any) => {
-                    // Handle OAuth2 initiation response
-                    // This might include redirecting to GitHub OAuth2 URL
-                    if (response.authUrl) {
-                        window.location.href = response.authUrl;
-                    }
-                    this.setLoadingState(false);
-                }),
-                catchError((error) => {
-                    this.setLoadingState(false);
-                    return this.handleError(error);
-                })
-            );
-    }
+        console.log("working", this.API_BASE_URL)
+       window.location.href  = "http://localhost:8080/api/github/connect"
+        return {status : true}
+
+     
+     }
+
+     getAccessToken(code:string): any {
+        console.log("code == >>", code)
+        
+            const url = `${this.API_BASE_URL}/api/github/access_token`;
+
+            // Send POST request to backend with the GitHub code
+            const data = this.http.post(url, { code });
+            console.log("data", data)
+             return data
+        
+      
+     }
+
+
+     saveUser(token:string): any {
+       
+        try {
+            const url = `${this.API_BASE_URL}/api/github/user`;
+
+            console.log("token", token)
+            // Send POST request to backend with the GitHub code
+            const data = this.http.post(url, { access_token : token });
+           
+            return data
+
+        } catch (error) {
+            console.log("ERROR", error);
+        }
+              
+     }
+
+    
+     removeUser(): any {
+        const url = `${this.API_BASE_URL}/api/github/remove`;
+        console.log('Deleting user from:', url);
+      
+        return this.http.post(url, {}).pipe(
+          tap(() => console.log('User Deleted Successfully')),
+          catchError((error) => {
+            console.error('Error deleting user:', error);
+            return throwError(() => error);
+          })
+        );
+      }
+      
+
+     
+
+  
+    saveUserData(): void {
+        //1b70d49557ab71cd67a1
+        
+        const code = this.route.snapshot.queryParamMap.get('code');
+        console.log("saveUserData  void", code)
+        if (code) {
+          // Send code to backend
+          this.http.get(`${this.API_BASE_URL}/api/github/callback/${code}`).subscribe({
+            next: (response) => {
+              console.log('GitHub connected:', response);
+
+             // this.saveUserData(response);
+             // this.router.navigate(['/dashboard']); // redirect to your main page
+            },
+            error: (err) => {
+              console.error('GitHub connection failed:', err);
+            }
+          });
+        }
+      }
 
     /**
      * Check current connection status with backend
@@ -193,9 +256,11 @@ export class GitHubAuthService {
             return throwError(() => new Error('Not authenticated'));
         }
 
+        // http://localhost:8080/api/github/access_token
+
         this.setLoadingState(true);
 
-        return this.http.post<GitHubConnectionState>(`${this.API_BASE_URL}/auth/refresh`, {})
+        return this.http.post<GitHubConnectionState>(`${this.API_BASE_URL}/github/access_token`, {})
             .pipe(
                 tap((connectionState) => {
                     this.updateAuthenticationState(connectionState);
@@ -368,6 +433,39 @@ export class GitHubAuthService {
             }
         });
     }
+
+    private headers() {
+        const token = localStorage.getItem('access_token');
+        return new HttpHeaders({ Authorization: `Bearer ${token}` });
+      }
+    
+      getOrganizations() {
+        return this.http.get(`${this.API_BASE_URL}/orgs`, { headers: this.headers() });
+      }
+    
+      getOrganizationRepos(org: string) {
+        return this.http.get(`${this.API_BASE_URL}/orgs/${org}/repos`, { headers: this.headers() });
+      }
+    
+      getRepoCommits(org: string, repo: string) {
+        return this.http.get(`${this.API_BASE_URL}/orgs/${org}/repos/${repo}/commits`, { headers: this.headers() });
+      }
+    
+      getRepoPulls(org: string, repo: string) {
+        return this.http.get(`${this.API_BASE_URL}/orgs/${org}/repos/${repo}/pulls`, { headers: this.headers() });
+      }
+    
+      getRepoIssues(org: string, repo: string) {
+        return this.http.get(`${this.API_BASE_URL}/orgs/${org}/repos/${repo}/issues`, { headers: this.headers() });
+      }
+    
+      getIssueChangelogs(org: string, repo: string, issue_number: number) {
+        return this.http.get(`${this.API_BASE_URL}/orgs/${org}/repos/${repo}/issues/${issue_number}/changelogs`, { headers: this.headers() });
+      }
+    
+      getOrganizationUsers(org: string) {
+        return this.http.get(`${this.API_BASE_URL}/orgs/${org}/users`, { headers: this.headers() });
+      }
 
     /**
      * Handle HTTP errors

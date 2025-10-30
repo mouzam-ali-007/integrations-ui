@@ -6,7 +6,7 @@
         <mat-toolbar-row>
             <div class="header-content">
                 <div class="logo-section">
-                    <mat-icon class="logo-icon">integration_instructions</mat-icon>
+
                     <span class="app-title">GitHub Integration Dashboard</span>
                 </div>
                 <span class="spacer"></span>
@@ -47,13 +47,13 @@
                     <mat-card-content>
                         <div class="welcome-content">
                             <div class="welcome-icon-container">
-                                <mat-icon class="welcome-icon">code</mat-icon>
+                                <mat-icon class="welcome-icon"></mat-icon>
                             </div>
                             <h1 class="welcome-title">Welcome to GitHub Integration</h1>
                             <p class="welcome-subtitle">Connect your GitHub account to access repositories, issues, pull
                                 requests, and more</p>
 
-                            <div class="features-preview">
+                            <!-- <div class="features-preview">
                                 <div class="feature-item">
                                     <mat-icon>security</mat-icon>
                                     <span>Secure OAuth2</span>
@@ -66,14 +66,42 @@
                                     <mat-icon>search</mat-icon>
                                     <span>Advanced Search</span>
                                 </div>
+                            </div> -->
+
+
+
+
+                            <div *ngIf="access_token; else connectBtn" class="status-container" style=" display: flex; justify-content: center;
+    align-items: center;">
+                                <mat-icon color="primary" class="status-icon"
+                                    style="color: green; margin-top: 5px; font-size: 16px;">
+                                    check_circle
+                                </mat-icon>
+                                <span>Connected</span>
+                                <button mat-raised-button color="primary" (click)="removeAccessToken()">
+                                    Remove Integration
+                                </button>
+
+                                <button mat-raised-button color="primary" (click)="viewCollection()">
+                                    View Collections
+                                </button>
+
                             </div>
 
-                            <button mat-raised-button color="primary" (click)="connectToGitHub()"
-                                [disabled]="state.isLoading" class="connect-button-large">
-                                <mat-icon *ngIf="!state.isLoading">link</mat-icon>
-                                <mat-spinner *ngIf="state.isLoading" diameter="20"></mat-spinner>
-                                {{ state.isLoading ? 'Connecting...' : 'Connect to GitHub' }}
-                            </button>
+                            <ng-template #connectBtn>
+                                <button mat-raised-button color="primary" (click)="connectToGitHub()"
+                                    [disabled]="state.isLoading" class="connect-button-large">
+                                    <mat-icon *ngIf="!state.isLoading">link</mat-icon>
+                                    <mat-spinner *ngIf="state.isLoading" diameter="20"></mat-spinner>
+                                    {{ state.isLoading ? 'Connecting...' : 'Connect to GitHub' }}
+                                </button>
+                            </ng-template>
+
+
+
+
+
+
                         </div>
                     </mat-card-content>
                 </mat-card>

@@ -26,6 +26,7 @@ import { GitHubAuthService } from './services/github-auth.service';
 // import { GitHubDataService } from './services/github-data.service';
 import { GitHubStateService } from './services/github-state.service';
 import { GitHubDataService } from './services/github-data.service';
+import { Dashboard } from '../../dashboard/dashboard';
 
 const routes: Routes = [
   {
@@ -40,6 +41,7 @@ const routes: Routes = [
     ReactiveFormsModule,
     RouterModule.forChild(routes),
     GitHubIntegrationComponent,
+    Dashboard,
 
     // Angular Material Modules
     MatButtonModule,

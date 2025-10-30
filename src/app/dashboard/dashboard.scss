@@ -1,0 +1,114 @@
+/* File: dashboard.scss */
+
+.dashboard-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 1rem;
+    background-color: #f9fafb;
+    min-height: 100vh;
+}
+
+
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+}
+
+.spinner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 50px;
+}
+
+.spinner {
+    border: 6px solid #f3f3f3;
+    border-top: 6px solid #007bff;
+    border-radius: 50%;
+    width: 25px;
+    height: 25px;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+.ag-overlay-loading-center {
+    background-color: rgba(255, 255, 255, 0.9);
+    border: 1px solid #ccc;
+    font-size: 16px;
+    padding: 20px;
+    text-align: center;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.ag-overlay-loading-center::before {
+    content: '';
+    width: 35px;
+    height: 35px;
+    border: 4px solid #ddd;
+    border-top-color: #007bff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-bottom: 10px;
+}
+
+@keyframes spin {
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+
+.search-bar {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.search-bar input {
+    width: 50%;
+    max-width: 500px;
+    padding: 0.6rem 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: all 0.2s ease-in-out;
+}
+
+.search-bar input:focus {
+    outline: none;
+    border-color: #4b9ce2;
+    box-shadow: 0 0 0 2px rgba(75, 156, 226, 0.2);
+}
+
+.ag-theme-alpine {
+    width: 100%;
+    height: 70vh;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+    overflow: hidden;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .search-bar input {
+        width: 80%;
+    }
+
+    h2 {
+        font-size: 1.25rem;
+    }
+}
